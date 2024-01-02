@@ -9,39 +9,38 @@ if(isset($_POST['login'])) {
 
     // Validate UserName
     if (!preg_match("/^[a-zA-Z0-9іїІЇ]+$/u", $adminuser)) {
-        $errorMessage = "Invalid characters in User Name. Only letters, numbers, and 'і', 'ї' are allowed.";
+        echo '<script>alert("Invalid characters in User Name. Only letters, numbers, and "і", "ї" are allowed.")</script>';
+        exit();
     }
 
     // Validate Password
     if (!preg_match("/^[a-zA-Z0-9іїІЇ_.,!@#\$%^&*()-]+$/u", $password)) {
-        $errorMessage = "Invalid characters in Password. Only letters, numbers, 'і', 'ї', and selected symbols are allowed.";
+        echo '<script>alert("Invalid characters in Password. Only letters, numbers, "і", "ї", and selected symbols are allowed.")</script>';
+        exit();
     }
 
-    // If there's an error message, display it
-    if(isset($errorMessage)) {
-        echo '<script>alert("' . htmlspecialchars($errorMessage) . '")</script>';
+    // Hash the password before querying the database
+    $hashedPassword = md5($password);
+
+    // Use prepared statements to prevent SQL injection
+    $query = mysqli_prepare($con, "SELECT ID FROM tbladmin WHERE UserName=? AND Password=?");
+    mysqli_stmt_bind_param($query, "ss", $adminuser, $hashedPassword);
+    mysqli_stmt_execute($query);
+    mysqli_stmt_store_result($query);
+
+    $rows = mysqli_stmt_num_rows($query);
+
+    if($rows > 0) {
+        mysqli_stmt_bind_result($query, $userID);
+        mysqli_stmt_fetch($query);
+        $_SESSION['zmsaid'] = $userID;
+        header('location:dashboard.php');
     } else {
-        $hashedPassword = md5($password);
-
-        $query = mysqli_prepare($con, "SELECT ID FROM tbladmin WHERE UserName=? AND Password=?");
-        mysqli_stmt_bind_param($query, "ss", $adminuser, $hashedPassword);
-        mysqli_stmt_execute($query);
-        mysqli_stmt_store_result($query);
-
-        $rows = mysqli_stmt_num_rows($query);
-
-        if($rows > 0) {
-            mysqli_stmt_bind_result($query, $userID);
-            mysqli_stmt_fetch($query);
-            $_SESSION['zmsaid'] = $userID;
-            header('location:dashboard.php');
-        } else {
-            echo '<script>alert("Incorrect data entered.")</script>';
-        }
-
-        mysqli_stmt_close($query);
-        mysqli_close($con);
+        echo '<script>alert("Incorrect data entered.")</script>';
     }
+
+    mysqli_stmt_close($query);
+    mysqli_close($con);
 }
 ?>
 
