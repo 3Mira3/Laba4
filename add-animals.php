@@ -2,16 +2,47 @@
 session_start();
 include('includes/dbconnection.php');
 error_reporting(0);
-if (strlen($_SESSION['zmsaid']==0)) {
-  header('location:logout.php');
-  } else{
-if(isset($_POST['submit']))
-  {
-    $aname=$_POST['aname'];
-    $cnum=$_POST['cnum'];
-    $fnum=$_POST['fnum'];
-    $breed=$_POST['breed'];
-    $desc=$_POST['desc'];
+
+if (strlen($_SESSION['zmsaid']) == 0) {
+    header('location:logout.php');
+} else {
+    if (isset($_POST['submit'])) {
+        $aname = mysqli_real_escape_string($con, $_POST['aname']);
+        $cnum = mysqli_real_escape_string($con, $_POST['cnum']);
+        $fnum = mysqli_real_escape_string($con, $_POST['fnum']);
+        $breed = mysqli_real_escape_string($con, $_POST['breed']);
+        $desc = mysqli_real_escape_string($con, $_POST['desc']);
+
+        // Validation regex patterns
+        $patternAnimalName = "/^[a-zA-Z0-9іїІЇ.,'\"()-]+$/u";
+        $patternCageFeedNumber = "/^[a-zA-Z0-9іїІЇ]+$/u";
+        $patternBreedDescription = "/^[a-zA-Z0-9іїІЇ.,'\"()-]+$/u";
+
+        // Validate inputs
+        if (!preg_match($patternAnimalName, $aname)) {
+            echo '<script>alert("Invalid characters in Animal Name. Only letters, numbers, and selected symbols are allowed.")</script>';
+            exit();
+        }
+        if (!preg_match($patternCageFeedNumber, $cnum)) {
+            echo '<script>alert("Invalid characters in Cage Number. Only letters and numbers are allowed.")</script>';
+            exit();
+        }
+        if (!preg_match($patternCageFeedNumber, $fnum)) {
+            echo '<script>alert("Invalid characters in Feed Number. Only letters and numbers are allowed.")</script>';
+            exit();
+        }
+        if (!preg_match($patternBreedDescription, $breed)) {
+            echo '<script>alert("Invalid characters in Breed. Only letters, numbers, and selected symbols are allowed.")</script>';
+            exit();
+        }
+        if (!preg_match($patternBreedDescription, $desc)) {
+            echo '<script>alert("Invalid characters in Description. Only letters, numbers, and selected symbols are allowed.")</script>';
+            exit();
+        }
+
+    }
+}
+
    $aimg=$_FILES["image"]["name"];
 $extension = substr($aimg,strlen($aimg)-4,strlen($aimg));
 $allowed_extensions = array(".jpg","jpeg",".png",".gif");
@@ -43,7 +74,7 @@ echo "<script>alert('This cage number or feed number is already alloted to other
     }
 }
 }
-}
+
   ?>
 <!doctype html>
 <html class="no-js" lang="en">
@@ -162,4 +193,4 @@ echo "<script>alert('This cage number or feed number is already alloted to other
 </body>
 
 </html>
-<?php }  ?>
+<?php  ?>

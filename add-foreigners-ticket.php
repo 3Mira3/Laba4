@@ -2,14 +2,28 @@
 session_start();
 include('includes/dbconnection.php');
 error_reporting(0);
-if (strlen($_SESSION['zmsaid']==0)) {
-  header('location:logout.php');
-  } else{
-if(isset($_POST['submit']))
-  {
-    $vname=$_POST['visitorname'];
-    $noadult=$_POST['noadult'];
-    $nochildren=$_POST['nochildren'];
+
+if (strlen($_SESSION['zmsaid']) == 0) {
+    header('location:logout.php');
+} else {
+    if (isset($_POST['submit'])) {
+        $vname = mysqli_real_escape_string($con, $_POST['visitorname']);
+        $noadult = mysqli_real_escape_string($con, $_POST['noadult']);
+        $nochildren = mysqli_real_escape_string($con, $_POST['nochildren']);
+
+        // Validation regex patterns
+        $patternVisitorName = "/^[a-zA-Z0-9іїІЇ.,'\"()-]+$/u";
+        $patternNumber = "/^[0-9]+$/";
+
+        // Validate inputs
+        if (!preg_match($patternVisitorName, $vname)) {
+            echo '<script>alert("Invalid characters in Visitor Name. Only letters, numbers, and selected symbols are allowed.")</script>';
+        } elseif (!preg_match($patternNumber, $noadult)) {
+            echo '<script>alert("Invalid input in Adult field. Only numbers are allowed.")</script>';
+        } elseif (!preg_match($patternNumber, $nochildren)) {
+            echo '<script>alert("Invalid input in Children field. Only numbers are allowed.")</script>';
+        } else {
+            
     $aprice=$_POST['aprice'];
     $cprice=$_POST['cprice'];
     $ticketid=mt_rand(100000000, 999999999);
@@ -25,10 +39,11 @@ if(isset($_POST['submit']))
        echo '<script>alert("Something Went Wrong. Please try again.")</script>';
     }
 
-  
+        }
+    }
 }
 
-  
+
   ?>
 
 <!doctype html>
@@ -157,4 +172,4 @@ while ($row=mysqli_fetch_array($ret)) {
 </body>
 
 </html>
-<?php }  ?>
+<?php   ?>
