@@ -8,7 +8,7 @@ if(isset($_POST['register'])) {
     $password = $_POST['password'];
 
     // Validate UserName
-    if (!preg_match("/^[a-zA-Z0-9іїІЇ]+$/u", $adminuser)) {
+    if (!preg_match("/^[a-zA-Z0-9іїІЇ]+$/u", $username)) {
         $errorMessage = "Invalid characters in User Name. Only letters, numbers, and 'і', 'ї' are allowed.";
     }
 
@@ -23,24 +23,33 @@ if(isset($_POST['register'])) {
     mysqli_stmt_bind_param($query, "ss", $username, $hashedPassword);
     $result = mysqli_stmt_execute($query);
 
-    if($result) {
-        echo '<script>alert("Registration successful. You can now login.")</script>';
-    } else {
-        echo '<script>alert("Registration failed. Please try again.")</script>';
-    }
+   if ($result) {
+    echo '<script>alert("Registration successful. You can now login.")</script>';
+} else {
+    echo '<script>alert("Registration failed. Please try again.")</script>';
+}
 
-if($rows > 0) {
-        mysqli_stmt_bind_result($query, $userID);
-        mysqli_stmt_fetch($query);
-        $_SESSION['zmsaid'] = $userID;
-        header('location:dashboard.php');
-        //exit; 
-    } else {
-        echo '<script>alert("Incorrect data entered.")</script>';
-    }
+if(isset($_POST['login'])) {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+$query = mysqli_prepare($con, "SELECT UserID FROM tblusers WHERE UserName = ? AND Password = ?");
+mysqli_stmt_bind_param($query, "ss", $username, $password);
+$result = mysqli_stmt_execute($query);
+$rows = mysqli_stmt_num_rows($query);
 
-    mysqli_stmt_close($query);
-    mysqli_close($con);
+if ($rows > 0) {
+    mysqli_stmt_bind_result($query, $userID);
+    mysqli_stmt_fetch($query);
+    $_SESSION['zmsaid'] = $userID;
+    header('location:dashboard.php');
+    exit;
+} else {
+    echo '<script>alert("Incorrect data entered.")</script>';
+}
+}
+mysqli_stmt_close($query);
+mysqli_close($con);
+
 }
 ?>
 
