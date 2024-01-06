@@ -111,6 +111,11 @@ if(isset($_POST['login'])) {
                         </div>
                         <div class="submit-btn-area">
                             <button id="form_submit" type="submit" name="login">Submit <i class="ti-arrow-right"></i></button>
+							
+							</div>
+                        <div style="padding-top: 20px">
+                                <a href="users/register.php">FOR USERS -> CLICK HERE!</a>
+                        </div>
                             
                         </div>
                         <div style="padding-top: 20px">

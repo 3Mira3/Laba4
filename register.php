@@ -3,6 +3,8 @@ session_start();
 error_reporting(0);
 include('includes/dbconnection.php');
 
+
+
 if(isset($_POST['register'])) {
     $username = $_POST['username'];
     $password = $_POST['password'];
@@ -29,28 +31,55 @@ if(isset($_POST['register'])) {
     echo '<script>alert("Registration failed. Please try again.")</script>';
 }
 
-if(isset($_POST['login'])) {
+} elseif(isset($_POST['login'])) {
     $username = $_POST['username'];
     $password = $_POST['password'];
-$query = mysqli_prepare($con, "SELECT UserID FROM tblusers WHERE UserName = ? AND Password = ?");
-mysqli_stmt_bind_param($query, "ss", $username, $password);
-$result = mysqli_stmt_execute($query);
-$rows = mysqli_stmt_num_rows($query);
 
-if ($rows > 0) {
-    mysqli_stmt_bind_result($query, $userID);
-    mysqli_stmt_fetch($query);
-    $_SESSION['zmsaid'] = $userID;
-    header('location:dashboard.php');
-    exit;
-} else {
-    echo '<script>alert("Incorrect data entered.")</script>';
-}
-}
-mysqli_stmt_close($query);
-mysqli_close($con);
+    // Validate UserName
+    if (!preg_match("/^[a-zA-Z0-9іїІЇ]+$/u", $username)) {
+        $errorMessage = "Invalid characters in User Name. Only letters, numbers, and 'і', 'ї' are allowed.";
+    }
 
+    // Validate Password
+    if (!preg_match("/^[a-zA-Z0-9іїІЇ_.,!@#\$%^&*()-]+$/u", $password)) {
+        $errorMessage = "Invalid characters in Password. Only letters, numbers, 'і', 'ї', and selected symbols are allowed.";
+    }
+
+    // If there's an error message, display it
+    if(isset($errorMessage)) {
+        echo '<script>alert("' . htmlspecialchars($errorMessage) . '")</script>';
+    } else {
+        $hashedPassword = substr(md5($password), 0, 20);
+echo '<script>alert("' . $hashedPassword . '")</script>';
+
+// c9f0f895fb98ab9159f51fd0297e236d
+// c9f0f895fb98ab9159f5
+
+        $query = mysqli_prepare($con, "SELECT ID FROM tblusers WHERE UserName=? AND Password=? ");
+        mysqli_stmt_bind_param($query, "ss", $username, $hashedPassword);
+        mysqli_stmt_execute($query);
+        mysqli_stmt_store_result($query);
+
+        $rows = mysqli_stmt_num_rows($query);
+
+        if($rows > 0) {
+            mysqli_stmt_bind_result($query, $userID);
+            mysqli_stmt_fetch($query);
+            $_SESSION['zmsaid'] = $userID;
+            header('location:dashboard.php');
+        } else {
+            echo '<script>alert("Wrong data entered. ' . mysqli_error($con) . '")</script>';
+        }
+
+        mysqli_stmt_close($query);
+        mysqli_close($con);
+    }
 }
+
+
+
+
+
 ?>
 
 <!-- HTML form for user registration -->
@@ -109,7 +138,7 @@ mysqli_close($con);
                             <i class="ti-lock"></i>
                         </div>
                         <div class="submit-btn-area">
-                            <button id="form_submit" type="submit" name="register">Register <i class="ti-arrow-right"></i></button>
+                            <button id="form_submit_register" type="submit" name="register">Register <i class="ti-arrow-right"></i></button>
                         </div>
                         <div class="row mb-4 rmber-area">
                             <div class="col-6">
@@ -120,11 +149,15 @@ mysqli_close($con);
                             </div>
                         </div>
                         <div class="submit-btn-area">
-                            <button id="form_submit" type="submit" name="login">Submit <i class="ti-arrow-right"></i></button>
+                            <button id="form_submit_login" type="submit" name="login">Submit <i class="ti-arrow-right"></i></button>
+							
+							<div style="padding-top: 20px">
+                                <a href="../index.php">FOR ADMIN -> CLICK HERE!</a>
+                        </div>
                             
                         </div>
                         <div style="padding-top: 20px">
-                                <a href="../index.php">Back Home!!</a>
+                                <a href="../../index.php">Back To Website!!</a>
                             </div>
                     </div>
                 </form>
